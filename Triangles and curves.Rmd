@@ -178,7 +178,8 @@ paste("Estimation of m:", mean(min_medians))
 ```{r getting interval, warning=FALSE, message = FALSE}
 get_interval <- function(x) 
 {
-  return(c(mean(x)-sqrt(-log(0.025)*8/length(x)), mean(x)+sqrt(-log(0.025)*8/length(x))))
+  return(c(a = mean(x)-sqrt(-log(0.025)/length(x)/2),
+           b = mean(x)+sqrt(-log(0.025)/length(x)/2)))
 }
 ```
 

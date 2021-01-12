@@ -68,7 +68,8 @@ get_pv_pvalue <- function(Val)
 
 get_abcd <- function(pvalue) list(a = q(pvalue), b = q(1 - pvalue), c = qch(1 - pvalue), d = qchisq(0.95, 4))
 
-get_pv_pvalue(Val)$pvalue[get_pv_pvalue(Val)$pv < qchisq(0.95, 4)]
+data.frame(pvalue = get_pv_pvalue(Val)$pvalue, 
+           "is okay" = get_pv_pvalue(Val)$pv < qchisq(0.95, 4))
 ```
 
 ```{r plot}
@@ -91,7 +92,8 @@ get_plot <- function(pvalue, f)
   return(fig)
 }
 
-get_plot(get_pv_pvalue(Val)$pvalue[get_pv_pvalue(Val)$pv < qchisq(0.95, 4)],F_)
+get_plot(get_pv_pvalue(Val)$pvalue[get_pv_pvalue(Val)$pv < qchisq(0.95, 4)],
+         function(x) pchisq(x,4))
 ```
 
 
@@ -126,20 +128,22 @@ get_plot1(get_pv_pvalue(Val)$pvalue[get_pv_pvalue(Val)$pv < qchisq(0.95, 4)])
 ### Задача № 2
 
 ```{r second, message=F}
-data1_csv <- read.tcsv("./data/Hypotheses and Least Squares/data1.csv", sep = ',')[1:11,1:2]
+data1_csv <- read.tcsv("./data/Hypotheses and Least Squares/data1.csv",
+                       sep = ',')[1:11,1:2]
 
 acceleration <- function(t, a) 0.7 + a*(t + 1)/(t + 2) 
 
 get_theta <-function(t, x) 
 {
-  X <- matrix(c(t^2/2 + t - (t+2)*log(t+2), t, rep(1,length(t))), ncol = 3, nrow = length(t))
+  X <- matrix(c(t^2/2 + t +0.35*t^2 - (t+2)*log(t+2), t, rep(1,length(t))),
+              ncol = 3, nrow = length(t))
   return(list(value = (solve(t(X) %*% X) %*% t(X)) %*% x, X = X))
 }
 
 get_x_t <- function(t, x) 
 {
   theta <- get_theta(t, x)$value
-  x_t <- function(t) theta[1,1]*(t^2/2 + t - (t+2)*log(t+2)) + theta[2,1]*t + theta[3,1]
+  x_t <- function(t) theta[1,1]*(t^2/2 + t + 0.35*t^2 - (t+2)*log(t+2)) + theta[2,1]*t + theta[3,1]
   return(x_t)
 }
 
@@ -167,9 +171,9 @@ fn <- function(t, x)
   theta <- get_theta(t, x)$value
   sigma_sq <- 1/(length(x) - length(theta))*sum((x - (X_ %*% theta))^2)
   cov_matrix <- sigma_sq*(solve((t(X_) %*% X_)))
-  Val1 <- matrix(c(0.85 - 3*log(3), 1, 1,
-                  0.7 - log(3), 1, 0,
-                  2/3, 0, 0), ncol=3, nrow=3, byrow = TRUE)
+  Val1 <- matrix(c(1.85 - 3*log(3), 1, 1,
+                   1.7 - log(3), 1, 0,
+                   2/3, 0, 0), ncol=3, nrow=3, byrow = TRUE)
   cov_matrix_vect <- Val1 %*% cov_matrix %*% t(Val1)
   return(cov_matrix_vect)
 }
