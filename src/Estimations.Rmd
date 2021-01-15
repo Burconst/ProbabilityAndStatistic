@@ -1,6 +1,6 @@
 ---
 knit: (function(input_file, encoding) {
-  out_dir <- 'docs';
+  out_dir <- '../docs';
   rmarkdown::render(input_file,
  encoding=encoding,
  output_file=file.path(dirname(input_file), out_dir, 'Estimations.html'))})
@@ -32,7 +32,7 @@ read.tcsv <- function(file, header=TRUE, sep=",", ...)
 ### Задача № 1
 
 ```{r import_data}
-data_csv <- as.numeric(read.tcsv("./data/Estimations/data.csv", sep = ',')[1:336,10])
+data_csv <- as.numeric(read.tcsv("../data/Estimations/data.csv", sep = ',')[1:336,10])
 ```
 
 ```{r cars1}
@@ -90,7 +90,7 @@ plot_ly(x = seq(6, 10, 0.001), y = sapply(seq(6, 10, 0.001), ecdf(data_csv)),
 ### Задача № 2
 
 ```{r pressure1}
-data1_csv <- as.numeric(read.tcsv("./data/Estimations/data1.csv", sep = ',')[1:351,5])
+data1_csv <- as.numeric(read.tcsv("../data/Estimations/data1.csv", sep = ',')[1:351,5])
 ```
 
 ```{r pressure2}
@@ -108,7 +108,7 @@ sapply(c("5" = 5, "10" = 10, "100" = 100, "300" = 300), confidence_interval)
 ### Задача № 3
 
 ```{r asd}
-data2_csv <- read.tcsv("./data/Estimations/data2.csv", sep = ',')[1:115,9:10]
+data2_csv <- read.tcsv("../data/Estimations/data2.csv", sep = ',')[1:115,9:10]
 M <-  sum(as.numeric(data2_csv[[1]])/as.numeric(data2_csv[[2]]))/sum(1/as.numeric(data2_csv[[2]]))
 M
 ```

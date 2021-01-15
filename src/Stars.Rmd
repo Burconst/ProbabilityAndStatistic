@@ -1,6 +1,6 @@
 ---
 knit: (function(input_file, encoding) {
-  out_dir <- 'docs';
+  out_dir <- '../docs';
   rmarkdown::render(input_file,
  encoding=encoding,
  output_file=file.path(dirname(input_file), out_dir, 'Stars.html'))})
@@ -16,7 +16,7 @@ library(dplyr)
 ```
 
 ```{r input_data}
-stars <- read.table("./data/Stars/stars.dat", header = T, sep = "|", comment.char = "%")
+stars <- read.table("../data/Stars/stars.dat", header = T, sep = "|", comment.char = "%")
 stars <- stars[stars[,"Mag.V"] < 5,]
 ```
 
@@ -51,7 +51,7 @@ colour[otherwise] <- '#ee77fa'
 
 
 ```{r asd}
-AQR <- read.table("./data/Stars/AQR.dat", sep = " ")
+AQR <- read.table("../data/Stars/AQR.dat", sep = " ")
 
 alpha <- (as.numeric(AQR[,1]) * pi / 12) - pi
 delta <- as.numeric(AQR[,2]) * pi / 180
@@ -74,16 +74,6 @@ eclip_df <- as.data.frame(ecliptic)
 
 ```
 
-```{r plot, warning=FALSE,message=FALSE}
-ggplot(data = coord_df, aes(x = -coord_df$V1, y = V2)) + geom_point(size = star_size/2, color = colour) +
-  theme(
-    panel.background = element_rect(fill = "#000033", colour = "#000033"),
-    plot.background=element_rect(fill = "#000033", colour = "#000033"),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank()
-  ) + geom_point(data = bound_df, aes(x = -bound_df$V1, y = V2), colour = "white", size = 0.5) + 
-  geom_line(data = eclip_df, aes(x = -eclip_df$V1, y = V2), colour = "red", size = 1)
-```
 
 ```{r plot2, warning=FALSE, message=FALSE}
 fig <- plot_ly(data = coord_df, x = -coord_df$V1, y = coord_df$V2,type = 'scatter',

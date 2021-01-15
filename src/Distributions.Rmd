@@ -1,6 +1,6 @@
 ---
 knit: (function(input_file, encoding) {
-  out_dir <- 'docs';
+  out_dir <- '../docs';
   rmarkdown::render(input_file,
  encoding=encoding,
  output_file=file.path(dirname(input_file), out_dir, 'Distributions.html'))})
@@ -127,7 +127,7 @@ empirical_distr_func_plot(zeta(300), zeta_distr_func, -2, 5)
 ```
 
 ```{r input_data}
-stars <- read.table("./data/Distributions/catalog.tsv", header = T, sep = "|") 
+stars <- read.table("../data/Distributions/catalog.tsv", header = T, sep = "|") 
 head(stars)
 ```
 

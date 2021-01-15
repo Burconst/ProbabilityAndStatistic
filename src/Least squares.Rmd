@@ -1,6 +1,6 @@
 ---
 knit: (function(input_file, encoding) {
-  out_dir <- 'docs';
+  out_dir <- '../docs';
   rmarkdown::render(input_file,
  encoding=encoding,
  output_file=file.path(dirname(input_file), out_dir, 'Hypotheses and Least Squares.html'))})
@@ -40,7 +40,7 @@ plot_ly(x = seq(-1, 3, 0.001), y = F_(seq(-1, 3, 0.001)), type = 'scatter',
 ```
 
 ```{r first1}
-Val <- read.csv("./data/Hypotheses and Least Squares/data.csv",header = FALSE, sep = ',')
+Val <- read.csv("../data/Hypotheses and Least Squares/data.csv",header = FALSE, sep = ',')
 
 q <- function(y) uniroot(function(x){ return(F_(x) - y)},c(-3, 11), tol = 1e-6)$root
 
@@ -128,7 +128,7 @@ get_plot1(get_pv_pvalue(Val)$pvalue[get_pv_pvalue(Val)$pv < qchisq(0.95, 4)])
 ### Задача № 2
 
 ```{r second, message=F}
-data1_csv <- read.tcsv("./data/Hypotheses and Least Squares/data1.csv",
+data1_csv <- read.tcsv("../data/Hypotheses and Least Squares/data1.csv",
                        sep = ',')[1:11,1:2]
 
 acceleration <- function(t, a) 0.7 + a*(t + 1)/(t + 2) 
