@@ -10,28 +10,42 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(plotly)
-library(ggplot2)
-library(dplyr)
 ```
 
 ```{r input_data}
-stars <- read.table("../data/Stars/stars.dat", header = T, sep = "|", comment.char = "%")
-stars <- stars[stars[,"Mag.V"] < 5,]
+stars <- read.csv("../data/Stars/stars.dat", header = T, sep = "|", na.strings = "~")
+head(stars)
+```
+
+```{r filter_data}
+stars <- stars[stars[,"Mag.V"] < 5,-1]
+summary(stars)
 ```
 
 ```{r se}
-coordinates_of_stars <- unlist(strsplit(stars$coord1..ICRS.J2000.2000., " "))
-coordinates_of_stars <- coordinates_of_stars[coordinates_of_stars != ""]
-coordinates_of_stars <- matrix(coordinates_of_stars, ncol = 6, byrow = T) 
+get_coords_from_str <- function(coord_str, n = 6) 
+{
+  helper <- function(row)
+  { 
+      res <- unlist(strsplit(row, " "))
+      res <- res[res != ""]
+      return(as.numeric(res))
+  }
+  coords <- sapply(coord_str,helper)
+  return(matrix(coords, ncol = n, byrow = T))
+}
 
-RA <- ((as.numeric(coordinates_of_stars[,1]) + (as.numeric(coordinates_of_stars[,2]))/60 +
-       (as.numeric(coordinates_of_stars[,3]))/3600) * pi / 12) - pi
-
-Dec <- (as.numeric(coordinates_of_stars[,4]) + (as.numeric(coordinates_of_stars[,5]))/60 +
-       (as.numeric(coordinates_of_stars[,6]))/3600) * pi / 180 
-
-new_coordinates <- matrix(c(3 / 2 * RA * sqrt((1 / 3) - (Dec / pi) ^ 2), Dec), ncol = 2)
+transf_coords <- function(coordinates_of_stars) 
+{
+  RA <- ((coordinates_of_stars[,1] + coordinates_of_stars[,2]/60 + 
+            coordinates_of_stars[,3]/3600) * pi / 12) - pi
+  
+  Dec <- (coordinates_of_stars[,4] + coordinates_of_stars[,5]/60 +
+            coordinates_of_stars[,6]/3600) * pi / 180 
+  
+  return(matrix(c(x = -(3 / 2 * RA * sqrt((1 / 3) - (Dec / pi) ^ 2)),
+                  y = Dec), ncol = 2))
+}
 ```
 
 
@@ -47,6 +61,23 @@ colour[colour == "G"] <- '#faef2b'
 colour[colour == "K"] <- '#f58b00'
 colour[colour == "M"] <- '#f52921'
 colour[otherwise] <- '#ee77fa'
+
+match_color <- function(x, id_color_pair, default_color = '#ee77fa') 
+{
+  colors <- rep('#ee77fa', length(x))
+  lapply(id_color_pair, function(pair)   pair["color"])
+  return(colors)
+}
+
+cl <- match_color(substr(stars[,"spec..type"], 1, 1),
+            list(c(id = "O", color = '#6f9ef0'),
+                 c(id = "B", color = '#a1c5f0'),
+                 c(id = "A", color = '#ffffff'),
+                 c(id = "F", color = '#f5ea87'),
+                 c(id = "G", color = '#faef2b'),
+                 c(id = "K", color = '#f58b00'),
+                 c(id = "M", color = '#f52921')))
+cl[cl != '#ee77fa']
 ```
 
 
@@ -71,26 +102,30 @@ star_size <- exp(-star_size/6)*2.5
 coord_df <- as.data.frame(new_coordinates)
 bound_df <- as.data.frame(AQR)
 eclip_df <- as.data.frame(ecliptic)
-
 ```
 
 
+
 ```{r plot2, warning=FALSE, message=FALSE}
-fig <- plot_ly(data = coord_df, x = -coord_df$V1, y = coord_df$V2,type = 'scatter',
-               mode = 'markers', marker = list(size = star_size,color = colour,line = list(width = 0)),
-               name = 'stars')
-fig <- fig %>% layout(title = 'Kavrayskiy projection, Aquarius.',
-                      yaxis = list(zeroline = F, showgrid = F),
-                      xaxis = list(zeroline = F, showgrid = F),
-                      showlegend = F,
-                      plot_bgcolor = 'rgb(0, 0, 51)')
+library(plotly)
 
-fig <- fig %>% add_trace(data = bound_df, x = -bound_df$V1, y = bound_df$V2,
-                         mode = 'lines', color = I('white'),line = list(width = 0.5),
-                         marker = list(size = 0.5), name = 'AQR boundaries')
-fig <- fig %>% add_trace(data = eclip_df, x = -eclip_df$V1, y = eclip_df$V2, 
-                         mode = 'lines', color = I('red'),line = list(width = 0.5),
-                         marker = list(size = 0.5), name = 'ecliptic')
+projection_plot <- function(coord_df) 
+{
+  plot_ly(data = coord_df, x = coord_df$x, y = coord_df$y,type = 'scatter',
+          mode = 'markers',  name = 'stars',
+          marker = list(size = star_size,color = colour,
+                        line = list(width = 0))) %>% 
+    add_trace(data = bound_df, x = -bound_df$V1, y = bound_df$V2,
+              mode = 'lines', color = I('white'),line = list(width = 0.5),
+              marker = list(size = 0.5), name = 'AQR boundaries') %>%
+    add_trace(data = eclip_df, x = -eclip_df$V1, y = eclip_df$V2, 
+              mode = 'lines', color = I('red'),line = list(width = 0.5),
+              marker = list(size = 0.5), name = 'ecliptic') %>%
+    layout(title = 'Kavrayskiy projection, Aquarius',
+           yaxis = list(zeroline = F, showgrid = F),
+           xaxis = list(zeroline = F, showgrid = F),
+           showlegend = F, plot_bgcolor = 'rgb(0, 0, 51)')
+}
 
-fig
+projection_plot()
 ```
