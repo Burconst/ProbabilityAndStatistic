@@ -1,0 +1,16 @@
+name: "my-website"
+navbar:
+  title: "My Website"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Stars"
+      href: Stars.html
+    - text: "Distributions"
+      href: Distributions.html
+    - text: "Triangles and curves"
+      href: Triangles and curves.html
+    - text: "Estimations"
+      href: Estimations.html
+    - text: "Hypotheses and Least Squares"
+      href: Hypotheses and Least Squares.html
