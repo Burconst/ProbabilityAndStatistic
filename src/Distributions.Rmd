@@ -57,16 +57,17 @@ density_plot <- function(dens, a, b)
   sd <- sqrt(variance(dens))
   fig <- plot_ly() %>%
     add_lines(x = x, y = y, name = "Density", 
-              line = list(color = 'rgb(198, 222, 7)', width = 2))  %>% 
+              line = list(color = 'rgb(46,65,76)', width = 2))  %>% 
     add_lines(x = rep(mean_val,2), y = c(0,max(y)), name = "Mean",
-              line = list(color = 'rgb(224, 14, 0)', width = 1))  %>% 
+              line = list(color = 'rgb(168,133,126)', width = 1))  %>% 
     add_lines(x = rep(mean_val+sd,2), y = c(0,max(y)), name = "Mean+std", 
-              line = list(color = 'rgb(23, 84, 145)', width = 1, dash = 'dot')) %>% 
+              line = list(color = 'rgb(168,133,126)', width = 1, dash = 'dot')) %>% 
     add_lines(x = rep(mean_val-sd,2), y = c(0,max(y)), name = "Mean-std",
-              line = list(color = 'rgb(23, 84, 145)', width = 1, dash = 'dot')) %>% 
-    layout(plot_bgcolor = 'rgb(227, 218, 245)', legend = list(orientation = 'h'),
+              line = list(color = 'rgb(168,133,126)', width = 1, dash = 'dot')) %>% 
+    layout(plot_bgcolor = 'rgba(48,48,48,0.1)', legend = list(orientation = 'h'),
            yaxis = list(zeroline = F), xaxis = list(zeroline = F),
-           title = paste("Density of zeta:  M[zeta] =",as.character(round(mean_val,2)),
+           title = paste("Density of zeta:  M[zeta] =",
+                         as.character(round(mean_val,2)),
                          ", D[zeta] =",as.character(round(sd^2,2))))
   return(fig)
 }
@@ -83,14 +84,14 @@ distr_func_plot <- function(distr_func, dens, a, b)
   sd <- sqrt(variance(dens))
   fig <- plot_ly() %>% 
     add_lines(x = x, y = y, name = "Distribution Function", 
-              line = list(color = 'rgb(66, 227, 209)', width = 2))  %>% 
+              line = list(color = 'rgb(46,65,76)', width = 2))  %>% 
     add_lines(x = rep(mean_val,2), y = c(0,max(y)), name = "Mean",
-              line = list(color = 'rgb(224, 14, 0)', width = 1))  %>% 
+              line = list(color = 'rgb(168,133,126)', width = 1))  %>% 
     add_lines(x = rep(mean_val+sd,2), y = c(0,max(y)), name = "Mean+std", 
-              line = list(color = 'rgb(23, 84, 145)', width = 1, dash = 'dot')) %>% 
+              line = list(color = 'rgb(168,133,126)', width = 1, dash = 'dot')) %>% 
     add_lines(x = rep(mean_val-sd,2), y = c(0,max(y)), name = "Mean-std", 
-              line = list(color = 'rgb(23, 84, 145)', width = 1, dash = 'dot')) %>% 
-    layout(plot_bgcolor = 'rgb(227, 218, 245)', legend = list(orientation = 'h'),
+              line = list(color = 'rgb(168,133,126)', width = 1, dash = 'dot')) %>% 
+    layout(plot_bgcolor = 'rgba(48,48,48,0.1)', legend = list(orientation = 'h'),
            yaxis = list(zeroline = F), xaxis = list(zeroline = F),
            title = paste("DF of zeta:  M[zeta] =",as.character(round(mean_val,2)),
                          ", D[zeta] =",as.character(round(sd^2,2))))
@@ -109,10 +110,10 @@ histogram_with_density_plot <- function(rval, dens)
   dens_fig <- density_plot(dens,-2,5) 
   fig <- plot_ly(type = "histogram") %>%       
     add_lines(x = x, y = y, name = "Density", 
-              line = list(color = 'rgb(198, 222, 7)', width = 2)) %>%
-    add_histogram(x = rval, histnorm = "probability",
+              line = list(color = 'rgb(46,65,76)', width = 2)) %>%
+    add_histogram(x = rval, histnorm = "probability", color = "rgb(168,133,126)",
                   name = "Histogram for zeta") %>%  # "histnorm" normalizes the histogram
-    layout(plot_bgcolor = 'rgb(227, 218, 245)', 
+    layout(plot_bgcolor = 'rgba(48,48,48,0.1)', 
            legend = list(orientation = 'h'),
            title = "Histogram for zeta with Density Curve")
   return(fig)
@@ -129,10 +130,10 @@ empirical_distr_func_plot <- function(rval, distr_func, a, b)
   y_distr_func <- unlist(lapply(x, distr_func))
   fig <- plot_ly() %>% 
     add_lines(x = x, y = y_ecdf, name = "Empirical DF",
-              line = list(color = 'rgb(250, 136, 85)')) %>%
+              line = list(color = 'rgb(46,65,76)')) %>%
     add_lines(x = x, y = y_distr_func, name = "DF",
-              line = list(color = 'rgb(66, 227, 209)')) %>%
-    layout(plot_bgcolor = 'rgb(227, 218, 245)', legend = list(orientation = 'h'),
+              line = list(color = 'rgb(168,133,126)')) %>%
+    layout(plot_bgcolor = 'rgba(48,48,48,0.1)', legend = list(orientation = 'h'),
            yaxis = list(zeroline = F), xaxis = list(zeroline = F),
            title = "Empirical DF of zeta")
   return(fig)
@@ -150,8 +151,8 @@ head(stars)
 histogram_plot <- function(values) 
 {
   fig <- plot_ly(type = "histogram") %>%       
-    add_histogram(x = values, name = "Masses") %>%
-    layout(plot_bgcolor = 'rgb(227, 218, 245)', showlegend = F,
+    add_histogram(x = values, name = "Masses", color = "rgb(168,133,126)") %>%
+    layout(plot_bgcolor = 'rgba(48,48,48,0.1)', showlegend = F,
            xaxis = list(title = "Masses of stars (M_sol)"),
            yaxis = list(title = "Count of stars"),
            title = "Nearby star masses distribution")
@@ -168,19 +169,20 @@ df_mass_plot <- function(values, a, b)
   x <- seq(a, b, by = .1)
   y_ecdf <- ecdf(values)(x)
   fig <- plot_ly() %>% 
-    add_lines(x = x, y = y_ecdf, name = "DF") %>%
+    add_lines(x = x, y = y_ecdf, name = "DF",
+              line = list(color = 'rgb(46,65,76)', width = 2)) %>%
     add_lines(x = rep(q[1],2), y = c(0,max(y_ecdf)), name = "0 %",
-              line = list(color = 'rgb(224, 14, 0)', width = 1)) %>% 
+              line = list(color = 'rgb(168,133,126)', width = 1)) %>% 
     add_lines(x = rep(q[2],2), y = c(0,max(y_ecdf)), name = "25 %",
-              line = list(color = 'rgb(224, 14, 0)', width = 1)) %>% 
+              line = list(color = 'rgb(168,133,126)', width = 1)) %>% 
     add_lines(x = rep(q[3],2), y = c(0,max(y_ecdf)), name = "50 %",
-              line = list(color = 'rgb(224, 14, 0)', width = 1)) %>% 
+              line = list(color = 'rgb(168,133,126)', width = 1)) %>% 
     add_lines(x = rep(q[4],2), y = c(0,max(y_ecdf)), name = "75 %",
-              line = list(color = 'rgb(224, 14, 0)', width = 1)) %>% 
+              line = list(color = 'rgb(168,133,126)', width = 1)) %>% 
     add_lines(x = rep(q[5],2), y = c(0,max(y_ecdf)), name = "100 %",
-              line = list(color = 'rgb(224, 14, 0)', width = 1)) %>% 
+              line = list(color = 'rgb(168,133,126)', width = 1)) %>% 
     layout(title = "Distribution Function of masses",
-           plot_bgcolor = 'rgb(227, 218, 245)',
+           plot_bgcolor = 'rgba(48,48,48,0.1)',
            xaxis = list(title = "Masses of stars (M_sol)", zeroline = F), 
            yaxis = list(zeroline = F))
   return(fig)
