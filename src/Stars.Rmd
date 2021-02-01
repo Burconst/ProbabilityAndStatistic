@@ -93,7 +93,7 @@ projection_plot <- function(coords, stars_size, stars_colors, AQR, ecliptic)
     layout(title = 'Kavrayskiy projection, Aquarius',
            yaxis = list(zeroline = F, showgrid = F),
            xaxis = list(zeroline = F, showgrid = F),
-           showlegend = F, plot_bgcolor = 'rgb(0, 0, 51)')
+           showlegend = F, plot_bgcolor = 'rgb(3,0,16)')
 }
 ```
 

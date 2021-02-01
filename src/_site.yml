@@ -15,5 +15,6 @@ navbar:
 output:
   html_document:
     theme: sandstone
-    highlight: tango
+    highlight: zenburn
   
+# "default", "tango", "pygments", 1"kate", "monochrome", "espresso", 1"zenburn", "haddock", "breezedark", "textmate"
