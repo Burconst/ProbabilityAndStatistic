@@ -62,28 +62,37 @@ seq(2.45, 2.55, 0.001)[which.max(sapply(seq(2.45, 2.55, 0.001), log_zeta_mle))]
 ```
 
 ```{r mle_plot, warning=FALSE,message=FALSE}
-plot_ly(x = seq(2.45, 2.55, 0.001), y = sapply(seq(2.45, 2.55, 0.001), zeta_mle), type = 'scatter', mode = 'lines')
-plot_ly(x = seq(2, 3, 0.001), y = sapply(seq(2, 3, 0.001), log_zeta_mle), type = 'scatter', mode = 'lines')
+
+subplot(
+ plot_ly(x = seq(2.45, 2.55, 0.001), y = sapply(seq(2.45, 2.55, 0.001), zeta_mle),
+        line = list(color = 'rgb(46,65,76)', width = 2),
+        type = 'scatter', mode = 'lines'),
+ plot_ly(x = seq(2, 3, 0.001), y = sapply(seq(2, 3, 0.001), log_zeta_mle), 
+        line = list(color = 'rgb(46,65,76)', width = 2),
+        type = 'scatter', mode = 'lines')
+)
 ```
 
 ```{r hist, message=F, warning = F}
 est_zeta_density <- function(t) zeta_density(t, est_theta)
 
-plot_ly(x = data_csv, type = 'histogram', alpha = 0.6, histnorm = "probability",
-        name = "histogram") %>%
+plot_ly(x = data_csv, type = 'histogram', histnorm = "probability",
+        alpha = 0.6, name = "histogram", color = "rgb(168,133,126)") %>%
   add_trace(x = seq(7, 9.5, 0.001), y = sapply(seq(7, 9.5, 0.001), est_zeta_density),
-            type = 'scatter', mode = 'lines', name = 'density') %>%
+            type = 'scatter', mode = 'lines', name = 'density',
+            line = list(color = 'rgb(46,65,76)', width = 2)) %>%
   layout(title = "", showlegend = F, xaxis = list(title = ""),
          yaxis = list (title = ""))
 ```
 
 ```{r pro_func_plot, message=F, warning = F}
 plot_ly(x = seq(6, 10, 0.001), y = sapply(seq(6, 10, 0.001), ecdf(data_csv)),
+        line = list(color = 'rgb(46,65,76)'),
         name = "ecdf", type = 'scatter', mode = 'lines') %>%
   add_trace(x = seq(6, 10, 0.001), 
             y = sapply(seq(6, 10, 0.001),
                        function(t) integrate(est_zeta_density, 2,t )$value),
-            name = "distr_func") %>% 
+            line = list(color = 'rgb(168,133,126)'), name = "distr_func") %>% 
   layout(title = "", showlegend = F, xaxis = list(title = ""), yaxis = list (title = ""))
 ```
 
