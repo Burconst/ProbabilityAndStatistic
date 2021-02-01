@@ -3,7 +3,7 @@ knit: (function(input_file, encoding) {
   out_dir <- '../docs';
   rmarkdown::render(input_file,
  encoding=encoding,
- output_file=file.path(dirname(input_file), out_dir, 'Stars.html'))})
+ output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
 title: "Stars"
 output: html_document
 ---
@@ -14,12 +14,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r input_data}
 stars <- read.csv("../data/Stars/stars.csv", header = T, sep = "|", na.strings = "~")
-head(stars)
+AQR <- read.table("../data/Stars/AQR.dat", sep = " ")
 ```
 
 ```{r filter_data}
 stars <- stars[stars[,"Mag.V"] < 5,-1]
-summary(stars)
 ```
 
 ```{r se}
@@ -35,97 +34,95 @@ get_coords_from_str <- function(coord_str, n = 6)
   return(matrix(coords, ncol = n, byrow = T))
 }
 
-transf_coords <- function(coordinates_of_stars) 
+transf_coords <- function(stars_coordinates) 
 {
-  RA <- ((coordinates_of_stars[,1] + coordinates_of_stars[,2]/60 + 
-            coordinates_of_stars[,3]/3600) * pi / 12) - pi
-  
-  Dec <- (coordinates_of_stars[,4] + coordinates_of_stars[,5]/60 +
-            coordinates_of_stars[,6]/3600) * pi / 180 
-  
-  return(matrix(c(x = -(3 / 2 * RA * sqrt((1 / 3) - (Dec / pi) ^ 2)),
-                  y = Dec), ncol = 2))
+  RA <- ((stars_coordinates[,1] + stars_coordinates[,2]/60 + 
+            stars_coordinates[,3]/3600)*pi/12) - pi
+  Dec <- (stars_coordinates[,4] + stars_coordinates[,5]/60 +
+            stars_coordinates[,6]/3600)*pi/180 
+  return(data.frame(x = -(3/2*RA*sqrt((1/3) - (Dec/pi)^2)), y = Dec))
 }
 ```
 
 
 ```{r set_color}
-colour <- substr(stars[,"spec..type"], 1, 1)
-otherwise <- colour != "O" & colour != "B" & colour != "A" & colour != "F" &
-             colour != "G" & colour != "K" & colour != "M"
-colour[colour == "O"] <- '#6f9ef0'
-colour[colour == "B"] <- '#a1c5f0'
-colour[colour == "A"] <- '#ffffff'
-colour[colour == "F"] <- '#f5ea87'
-colour[colour == "G"] <- '#faef2b'
-colour[colour == "K"] <- '#f58b00'
-colour[colour == "M"] <- '#f52921'
-colour[otherwise] <- '#ee77fa'
-
-match_color <- function(x, id_color_pair, default_color = '#ee77fa') 
+match_color <- function(x, id_color_df, default_color = '#ee77fa') 
 {
-  colors <- rep('#ee77fa', length(x))
-  lapply(id_color_pair, function(pair)   pair["color"])
-  return(colors)
+  sapply(x, function(elem) ifelse(prod(id_color_df$id != elem) == 0,
+                                  id_color_df$color[id_color_df$id == elem],
+                                  default_color))
 }
-
-cl <- match_color(substr(stars[,"spec..type"], 1, 1),
-            list(c(id = "O", color = '#6f9ef0'),
-                 c(id = "B", color = '#a1c5f0'),
-                 c(id = "A", color = '#ffffff'),
-                 c(id = "F", color = '#f5ea87'),
-                 c(id = "G", color = '#faef2b'),
-                 c(id = "K", color = '#f58b00'),
-                 c(id = "M", color = '#f52921')))
-cl[cl != '#ee77fa']
 ```
 
 
-```{r asd}
-AQR <- read.table("../data/Stars/AQR.dat", sep = " ")
-
-alpha <- (as.numeric(AQR[,1]) * pi / 12) - pi
-delta <- as.numeric(AQR[,2]) * pi / 180
-AQR <- matrix(c(3 / 2 * alpha * sqrt((1 / 3) - (delta / pi) ^ 2), delta), ncol = 2)
-
-delta_ecl <- asin(sin(23.5 * pi / 180) * sin(c(1:180) * pi / 180))
-alpha_ecl <- (acos(cos(c(1:180) * pi / 180) / cos(delta_ecl))) - pi 
-
-delta_ecl <- c(delta_ecl, asin(sin(23.5 * pi / 180) * sin(c(360:181) * pi / 180)))
-alpha_ecl <- c(alpha_ecl, acos(cos(c(360:181) * pi / 180) / cos(delta_ecl[181:360])))
-
-ecliptic <- matrix(c(3 / 2 * alpha_ecl * sqrt((1 / 3) - (delta_ecl / pi) ^ 2), delta_ecl), ncol = 2)
-
-star_size <- as.numeric(stars[,"Mag.V"])
-star_size <- exp(-star_size/6)*2.5
-
-coord_df <- as.data.frame(new_coordinates)
-bound_df <- as.data.frame(AQR)
-eclip_df <- as.data.frame(ecliptic)
+```{r AQR}
+transf_AQR <- function(AQR) 
+{
+  data.frame(x = 3/2*(pi - (AQR[,1]*pi/12))*sqrt((1/3) - (AQR[,2]*pi/180/pi)^2),
+             y = AQR[,2]*pi/180)
+}
 ```
 
+```{r ecliptic}
+get_ecliptic <- function()
+{
+  delta <- c(asin(sin(23.5 * pi / 180) * sin(c(1:180) * pi / 180)),
+             asin(sin(23.5 * pi / 180) * sin(c(360:181) * pi / 180)))
+  alpha <- c((acos(cos(c(1:180) * pi / 180) / cos(delta[1:180]))) - pi,
+             acos(cos(c(360:181) * pi / 180) / cos(delta[181:360])))
+  alpha <- -3/2*alpha*sqrt((1/3) - (delta/pi)^2)
+  return(data.frame(alpha, delta))
+}
+```
 
-
-```{r plot2, warning=FALSE, message=FALSE}
+```{r plot, warning=FALSE, message=FALSE}
 library(plotly)
 
-projection_plot <- function(coord_df) 
+projection_plot <- function(coords, stars_size, stars_colors, AQR, ecliptic) 
 {
-  plot_ly(data = coord_df, x = coord_df$x, y = coord_df$y,type = 'scatter',
+  plot_ly(data = coords, x = coords$x, y = coords$y,type = 'scatter',
           mode = 'markers',  name = 'stars',
-          marker = list(size = star_size,color = colour,
+          marker = list(size = stars_size,color = stars_colors,
                         line = list(width = 0))) %>% 
-    add_trace(data = bound_df, x = -bound_df$V1, y = bound_df$V2,
-              mode = 'lines', color = I('white'),line = list(width = 0.5),
+    add_trace(data = AQR, x = AQR$x, y = AQR$y,
+              mode = 'lines', color = I('white'), line = list(width = 0.5),
               marker = list(size = 0.5), name = 'AQR boundaries') %>%
-    add_trace(data = eclip_df, x = -eclip_df$V1, y = eclip_df$V2, 
-              mode = 'lines', color = I('red'),line = list(width = 0.5),
+    add_trace(data = ecliptic, x = ecliptic$alpha, y = ecliptic$delta, 
+              mode = 'lines', color = I('red'), line = list(width = 0.5),
               marker = list(size = 0.5), name = 'ecliptic') %>%
     layout(title = 'Kavrayskiy projection, Aquarius',
            yaxis = list(zeroline = F, showgrid = F),
            xaxis = list(zeroline = F, showgrid = F),
            showlegend = F, plot_bgcolor = 'rgb(0, 0, 51)')
 }
-
-projection_plot()
 ```
+
+```{r result, warning=FALSE, message=FALSE}
+projection_plot(
+  coords = transf_coords(get_coords_from_str(stars$coord1.ICRS.J2000.2000.)),
+  stars_size = exp(-as.numeric(stars[,"Mag.V"])/6)*2.5,
+  stars_colors = match_color(substr(stars[,"spec..type"], 1, 1),
+                  data.frame(id = c("O", "B", "A", "F", "G", "K", "M"),
+                             color = c('#6f9ef0', '#a1c5f0', '#ffffff',
+                                       '#f5ea87', '#faef2b', '#f58b00', 
+                                       '#f52921'))),
+  AQR = transf_AQR(AQR),
+  ecliptic = get_ecliptic()
+  )
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

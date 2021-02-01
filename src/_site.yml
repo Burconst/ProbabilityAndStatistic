@@ -1,11 +1,9 @@
-name: "my-website"
+name: "Probability & Statistic"
 navbar:
-  title: "My Website"
+  title: "Probability & Statistic"
   left:
-    - text: "Home"
-      href: index.html
     - text: "Stars"
-      href: Stars.html
+      href: index.html
     - text: "Distributions"
       href: Distributions.html
     - text: "Triangles and curves"
